@@ -7,7 +7,7 @@ import java.util.List;
  */
 public class Main {
     public static void main(String[] args) {
-        String path = "C:/ml/hw1/data/liver-disorders.csv";
+        String path = "/home/amir/school/ml/hw1/data/liver-disorders.csv";
 
         if (args.length > 0)
             path = args[0];

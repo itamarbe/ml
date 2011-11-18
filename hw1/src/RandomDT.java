@@ -68,9 +68,9 @@ public class RandomDT {
 
         public double splitValue;
 
-        public Node left;
+        public Node left=null;
 
-        public Node right;
+        public Node right=null;
 
 
         public Node(Node left, Node right, String featureName, double splitValue) {
@@ -118,7 +118,7 @@ public class RandomDT {
         return possibleValue.get(0);
     }
 
-    private static Random random = new Random();
+    private static Random random = new Random(0);
 
     private int getRandomFeatureIndex(List<Instance> trainSet) {
         Instance instance = trainSet.get(0);
@@ -146,16 +146,24 @@ public class RandomDT {
     @Override
     public String toString() {
 
-        return printNode(root);
+        return printNode(root,0);
 
 
     }
 
-    private String printNode(Node node) {
+    private String printNode(Node node,int indentDepth) {
+        String prefixSequence = "--|";
+        StringBuilder prefixString = new StringBuilder();
+        for (int i=0;i<indentDepth;i++) {
+            prefixString.append(prefixSequence);
+        }
         if (node == null) {
             return "";
         }
 
-        return (node.featureName + "\n") + printNode(node.left) + printNode(node.right);
+        return prefixString.toString() + (node.featureName + " < " + node.splitValue + "\n") +
+               printNode(node.left,indentDepth+1) +
+               prefixString.toString() + (node.featureName + " >= " + node.splitValue + "\n") +
+               printNode(node.right,indentDepth+1);
     }
 }
