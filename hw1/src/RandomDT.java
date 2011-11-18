@@ -2,10 +2,8 @@ import org.omg.PortableInterceptor.NON_EXISTENT;
 
 import java.awt.*;
 import java.awt.geom.Path2D;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Assumes that all Features are continuous.
@@ -60,19 +58,43 @@ public class RandomDT {
         // select a random feature
         else {
             int featureIndex = getRandomFeatureIndex(instances);
-            String featureName = instances.get(0).getFeatureName(featureIndex);
-            double splitValue = getRandomSplitValue(instances, featureIndex);
+            if (getNumberOfFeatureValues(instances,featureIndex)==1) {
+                return new SplitLeaf(getNumberOfPositiveLabels(instances),instances.size());
+            } else {
+                String featureName = instances.get(0).getFeatureName(featureIndex);
+                double splitValue = getRandomSplitValue(instances, featureIndex);
 
-            Pair<List<Instance>> splitInstances = splitInstances(instances, featureIndex, splitValue);
-            Node left = recursiveSplit(splitInstances.first);
-            Node right = recursiveSplit(splitInstances.second);
+                Pair<List<Instance>> splitInstances = splitInstances(instances, featureIndex, splitValue);
+                Node left = recursiveSplit(splitInstances.first);
+                Node right = recursiveSplit(splitInstances.second);
 
-            return new Node(left, right, featureName, splitValue);
+                return new Node(left, right, featureName, featureIndex, splitValue);
+            }
         }
+    }
+
+    private int getNumberOfPositiveLabels(List<Instance> instances) {
+        int counter = 0;
+        for (Instance instance : instances) {
+            if (instance.getLabelValue() == 1.0) {
+                counter++;
+            }
+        }
+        return counter;
+    }
+
+    public int getNumberOfFeatureValues(List<Instance> instances,int featureIndex) {
+        Set<Double> valueSet = new HashSet<Double>();
+        for (Instance instance : instances) {
+            valueSet.add(new Double(instance.getFeatureValue(featureIndex)));
+        }
+        return valueSet.size();
     }
 
     public class Node {
         public String featureName;
+
+        public int featureIndex;
 
         public double splitValue;
 
@@ -80,37 +102,48 @@ public class RandomDT {
 
         public Node right=null;
 
-        public Node(Node left, Node right, String featureName, double splitValue) {
+        public Node(Node left, Node right, String featureName, int featureIndex, double splitValue) {
             this.left = left;
             this.right = right;
             this.featureName = featureName;
             this.splitValue = splitValue;
+            this.featureIndex = featureIndex;
+        }
+
+        public Node() {
         }
     }
 
     public class Leaf extends Node {
         private double label;
 
-        public Leaf(Node left, Node right, String featureName, double splitValue) {
-            super(left, right, featureName, splitValue);
+        public Leaf(Node left, Node right, String featureName, int featureIndex, double splitValue) {
+            super(left, right, featureName, featureIndex, splitValue);
         }
 
         public Leaf(List<Instance> instances) {
-            super(null,null,null,0.0);
+            super(null,null,null,0, 0.0);
             this.label=instances.get(0).getLabelValue();
         }
 
     }
 
-    public class Pair<E> {
-        public E first;
-        public E second;
+    public class SplitLeaf extends Node {
 
-        public Pair(E first, E second) {
-            this.first = first;
-            this.second = second;
+        public int numPositive;
+        public int numTotal;
+
+        public SplitLeaf(Node left, Node right, String featureName, int featureIndex, double splitValue) {
+            super(left, right, featureName, featureIndex, splitValue);
+        }
+
+        public SplitLeaf(int numPositive,int numTotal) {
+
+            this.numPositive = numPositive;
+            this.numTotal = numTotal;
         }
     }
+
 
     private Pair<List<Instance>> splitInstances(List<Instance> instances, int featureIndex, double splitValue) {
         List<Instance> lessThanValueInstances = new ArrayList<Instance>();
@@ -156,8 +189,38 @@ public class RandomDT {
      *         If the Decision Tree has not been trained, either throw an exception
      *         or return "-1", which stands for an empty Label value.
      */
-    public double classify(Instance instance) {
-        return 0;
+    public double classify(Instance instance)  {
+        Node current = root;
+        while (true) {
+            if (current == null) {
+                System.out.println("Got null node :(");
+                return -1;
+            }
+            int featureIndex = current.featureIndex;
+            double splitValue = current.splitValue;
+            double instanceFeatureValue = instance.getFeatureValue(featureIndex);
+            if (instanceFeatureValue < splitValue) {
+                if (current.left instanceof Leaf) {
+                    return ((Leaf)(current.left)).label;
+                } else if (current.left instanceof SplitLeaf ) {
+                    SplitLeaf s = (SplitLeaf)(current.left);
+                    return random.nextDouble()<=((new Double(s.numPositive))/(new Double(s.numTotal)))?1.0:0.0;
+                } else {
+                    current = current.left;
+                    continue;
+                }
+            } else {
+                if (current.right instanceof Leaf) {
+                    return ((Leaf)(current.right)).label;
+                } else if (current.right instanceof SplitLeaf ) {
+                    SplitLeaf s = (SplitLeaf)(current.right);
+                    return random.nextDouble()<=((new Double(s.numPositive))/(new Double(s.numTotal)))?1.0:0.0;
+                } else {
+                    current = current.right;
+                    continue;
+                }
+            }
+        }
     }
 
     /**
@@ -166,10 +229,7 @@ public class RandomDT {
      */
     @Override
     public String toString() {
-
         return printNode(root,0);
-
-
     }
 
     private String printNode(Node node,int indentDepth) {
@@ -185,6 +245,10 @@ public class RandomDT {
         if (node instanceof Leaf) {
             Leaf l = (Leaf)node;
             return " (" + Double.toString(l.label) + ")";
+        }
+        if (node instanceof SplitLeaf) {
+            SplitLeaf s = (SplitLeaf)node;
+            return " ({" + s.numPositive + "," + (s.numTotal-s.numPositive) + "})";
         }
 
         return "\n" + prefixString.toString() + (node.featureName + " < " + node.splitValue) +
