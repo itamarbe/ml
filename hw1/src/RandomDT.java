@@ -1,3 +1,7 @@
+import org.omg.PortableInterceptor.NON_EXISTENT;
+
+import java.awt.*;
+import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,8 +49,12 @@ public class RandomDT {
 
     private Node recursiveSplit(List<Instance> instances) {
         // stop condition
-        if (instances.size() == 0 || isOneClassOnly(instances)) {
+        if (instances.size() == 0 ) {
             return null;
+        }
+
+        if (isOneClassOnly(instances)) {
+            return new Leaf(instances);
         }
 
         // select a random feature
@@ -72,13 +80,26 @@ public class RandomDT {
 
         public Node right=null;
 
-
         public Node(Node left, Node right, String featureName, double splitValue) {
             this.left = left;
             this.right = right;
             this.featureName = featureName;
             this.splitValue = splitValue;
         }
+    }
+
+    public class Leaf extends Node {
+        private double label;
+
+        public Leaf(Node left, Node right, String featureName, double splitValue) {
+            super(left, right, featureName, splitValue);
+        }
+
+        public Leaf(List<Instance> instances) {
+            super(null,null,null,0.0);
+            this.label=instances.get(0).getLabelValue();
+        }
+
     }
 
     public class Pair<E> {
@@ -161,9 +182,14 @@ public class RandomDT {
             return "";
         }
 
-        return prefixString.toString() + (node.featureName + " < " + node.splitValue + "\n") +
+        if (node instanceof Leaf) {
+            Leaf l = (Leaf)node;
+            return " (" + Double.toString(l.label) + ")";
+        }
+
+        return "\n" + prefixString.toString() + (node.featureName + " < " + node.splitValue) +
                printNode(node.left,indentDepth+1) +
-               prefixString.toString() + (node.featureName + " >= " + node.splitValue + "\n") +
+               "\n" + prefixString.toString() + (node.featureName + " >= " + node.splitValue )+
                printNode(node.right,indentDepth+1);
     }
 }
