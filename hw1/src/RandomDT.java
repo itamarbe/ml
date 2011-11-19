@@ -120,9 +120,6 @@ public class RandomDT {
             double splitValue = useInformationGain ? getGainSplitValue(instances, featureIndex) : getRandomSplitValue(instances, featureIndex);
 
             Pair<List<Instance>> splitInstances = splitInstances(instances, featureIndex, splitValue);
-            if ((splitInstances.first.size()==0) || (splitInstances.second.size()==0)) {
-                double splitValue2 = useInformationGain ? getGainSplitValue(instances, featureIndex) : getRandomSplitValue(instances, featureIndex);
-            }
 
             Node left = recursiveTrainer(splitInstances.first);
             Node right = recursiveTrainer(splitInstances.second);
@@ -172,12 +169,12 @@ public class RandomDT {
                 valueListMap.put(value, valueList);
             }
         }
-        double bestEntropy = -1.0;
+        double bestEntropy = 1.01;
         double bestEntropySplitValue = (firstSplitValue!=minSplitValue)?firstSplitValue:secondSplitValue;
         for (Double currentSplitValue : valueListMap.keySet()) {
             List<Instance> listInstance = valueListMap.get(currentSplitValue);
             double currentEntropy = calculateEntropy(listInstance);
-            if ((currentEntropy >= bestEntropy) && (!currentSplitValue.equals(minSplitValue))) {
+            if ((currentEntropy <= bestEntropy) && (!currentSplitValue.equals(minSplitValue))) {
                 bestEntropy = currentEntropy;
                 bestEntropySplitValue = currentSplitValue;
             }
