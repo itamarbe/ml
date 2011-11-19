@@ -8,23 +8,22 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        String path = "/home/amir/school/ml/hw1/data/liver-disorders.csv";
+        String path = "/data/liver-disorders.csv";
 
         boolean randomize = true;
+        boolean useInformationGain = false;
+        boolean usePriors = true;
 
         // get path for command line
         if (args.length > 0)
             path = args[0];
 
-        if (args.length > 1)
-            randomize = Boolean.parseBoolean(args[1]);
-
         // load instances
         final List<Instance> instances = Instance.loadInstances(path);
-        Simulator sim = new Simulator(randomize);
+        Simulator sim = new Simulator(randomize, useInformationGain, usePriors);
 
         // section c
-        List<Result> results = sim.bulkRun(instances, 100, 0.3);
+        List<Result> results = sim.bulkRun(instances, 100, 0.7);
 
         // section d
         sim.plotOverallAccuracy(results);
@@ -32,14 +31,16 @@ public class Main {
         sim.plotNegativeAccuracy(results);
 
         // section e.a
-//        sim.plotDecisionTree(instances);
+        sim.plotDecisionTree(instances);
 
         // section e.b
         sim.plotConfusionMatrix(results);
+
+        // section f
+        final double positivePrior = RandomDT.getPositivePrior(instances);
+        System.out.println("\nDataset positive prior: " + positivePrior + ", negative prior: " + (1 - positivePrior));
+
     }
 
-
-
-    
 
 }

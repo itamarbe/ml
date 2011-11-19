@@ -8,12 +8,16 @@ import java.util.*;
  * The splitting value used is also selected randomly.
  */
 public class RandomDT {
-    private static double log2(double number) {
-        return (Math.log(number)/Math.log(2));
-    }
+
+    // the root of the tree
     private Node root;
 
+    // random generator that create the random numbers
     private Random random;
+
+    // choose whether to use random split or information gain
+    private boolean useInformationGain;
+    private boolean usePriors;
 
     /**
      * Creates a new instance of a Random Decision Tree.
@@ -23,18 +27,38 @@ public class RandomDT {
         random = new Random();
     }
 
-    public RandomDT(Random random) {
+    public RandomDT(Random random, boolean useInformationGain, boolean usePriors) {
         this.random = random;
+        this.useInformationGain = useInformationGain;
+        this.usePriors = usePriors;
     }
 
+
+    private double posClassPrior;
 
     /**
      * Trains the Decision Tree.
      *
      * @param trainSet received set of Instance objects.
      */
-    public void train(List<Instance> trainSet,boolean useInformationGain) {
-        root = recursiveTrainer(trainSet,useInformationGain);
+    public void train(List<Instance> trainSet) {
+        posClassPrior = getPositivePrior(trainSet);
+
+        root = recursiveTrainer(trainSet);
+    }
+
+    public static double getPositivePrior(List<Instance> instances) {
+        double prior = 0;
+
+        for (Instance instance : instances) {
+            if (instance.getLabelValue() == 1) {
+                prior++;
+            }
+        }
+
+        prior /= instances.size();
+
+        return prior;
     }
 
     private boolean isOneClassOnly(List<Instance> instances) {
@@ -49,27 +73,52 @@ public class RandomDT {
         return true;
     }
 
-    private Node recursiveTrainer(List<Instance> instances,boolean useInformationGain) {
-        // stop condition
+    private boolean allHasSameValues(List<Instance> instances) {
+        if (instances.size() <= 1)
+            return true;
+
+        List<Feature> firstFeatures = instances.get(0).getAllFeatures();
+
+        for (Instance instance : instances) {
+            for (int i = 0; i < firstFeatures.size(); i++) {
+
+                // there is at least 1 feature of 1 different value
+                if (instance.getFeatureValue(i) != firstFeatures.get(i).getValue()){
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+
+    private Node recursiveTrainer(List<Instance> instances) {
+        // stop condition - select a random variables according to priors
         if (instances.size() == 0) {
-            return new Node(random.nextInt(1));
+            return getNewDefaultLabel();
         }
 
-        // stop condition
+        // stop condition - all the instances are in the same class
         if (isOneClassOnly(instances)) {
             return new Node(instances.get(0).getLabelValue());
+        }
+
+        // stop condition - all instances has the same feature values but has different classes
+        // this is an edge cases where all instances feature values are the same.
+        if (allHasSameValues(instances)) {
+            return getNewDefaultLabel();
         }
 
         // select a random feature
         else {
             int featureIndex = getRandomFeature(instances);
             String featureName = instances.get(0).getFeatureName(featureIndex);
-            double splitValue = useInformationGain?getGainSplitValue(instances,featureIndex):getRandomSplitValue(instances, featureIndex);
+            double splitValue = useInformationGain ? getGainSplitValue(instances, featureIndex) : getRandomSplitValue(instances, featureIndex);
 
             Pair<List<Instance>> splitInstances = splitInstances(instances, featureIndex, splitValue);
 
-            Node left = recursiveTrainer(splitInstances.first,useInformationGain);
-            Node right = recursiveTrainer(splitInstances.second,useInformationGain);
+            Node left = recursiveTrainer(splitInstances.first);
+            Node right = recursiveTrainer(splitInstances.second);
 
             return new Node(left, right, featureName, featureIndex, splitValue);
         }
@@ -86,27 +135,26 @@ public class RandomDT {
                 numberNegatives += 1.0;
             }
         }
-        double positiveProbability = numberPositives/total;
-        double negativeProbability = numberNegatives/total;
-        return -positiveProbability*log2(positiveProbability)-negativeProbability*log2(negativeProbability);
+        double positiveProbability = numberPositives / total;
+        double negativeProbability = numberNegatives / total;
+        return -positiveProbability * log2(positiveProbability) - negativeProbability * log2(negativeProbability);
     }
 
     private double getGainSplitValue(List<Instance> instances, int featureIndex) {
-        Map<Double,List<Instance>> valueListMap = new HashMap<Double, List<Instance>>();
+        Map<Double, List<Instance>> valueListMap = new HashMap<Double, List<Instance>>();
         for (Instance instance : instances) {
             Double value = instance.getFeatureValue(featureIndex);
             if (valueListMap.containsKey(value)) {
                 valueListMap.get(value).add(instance);
-            }
-            else {
+            } else {
                 List<Instance> valueList = new ArrayList<Instance>();
                 valueList.add(instance);
-                valueListMap.put(value,valueList);
+                valueListMap.put(value, valueList);
             }
         }
         double bestEntropy = 1.01;
         double bestEntropySplitValue = 0.0;
-        for (Double currentSplitValue: valueListMap.keySet()) {
+        for (Double currentSplitValue : valueListMap.keySet()) {
             List<Instance> listInstance = valueListMap.get(currentSplitValue);
             double currentEntropy = calculateEntropy(listInstance);
             if (currentEntropy < bestEntropy) {
@@ -152,7 +200,7 @@ public class RandomDT {
     /**
      * Classify a given instance
      *
-     * @param current the current iterated node
+     * @param current  the current iterated node
      * @param instance the instance that neended to be classified
      * @return the classification of the given instance.
      *         If the Decision Tree has not been trained, either throw an exception
@@ -201,5 +249,18 @@ public class RandomDT {
                 printNode(node.getLeft(), indentDepth + 1) +
                 "\n" + prefixString.toString() + (node.getFeatureName() + " >= " + node.getSplitValue()) +
                 printNode(node.getRight(), indentDepth + 1);
+    }
+
+    private static double log2(double number) {
+        return (Math.log(number) / Math.log(2));
+    }
+
+    public Node getNewDefaultLabel() {
+        if (usePriors) {
+            double label = (random.nextDouble() < posClassPrior) ? 1 : 0;
+            return new Node(label);
+        }
+
+        return new Node(random.nextInt(1));
     }
 }

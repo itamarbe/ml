@@ -4,27 +4,32 @@ import java.util.Random;
 
 
 public class Simulator {
-
-
     private Random random = new Random();
 
-    public Simulator(boolean randomize) {
+    private boolean useInformationGain;
+    private boolean usePriors;
+
+    public Simulator(boolean randomize, boolean useInformationGain, boolean usePriors) {
         random = randomize ? new Random() : new Random(0);
+        this.useInformationGain = useInformationGain;
+        this.usePriors = usePriors;
     }
 
 
-    public void plotDecisionTree(List<Instance> instances){
-        RandomDT dt = new RandomDT(random);
-        dt.train(instances,false);
+    public void plotDecisionTree(List<Instance> instances) {
+        RandomDT dt = new RandomDT(random, useInformationGain, usePriors);
+        dt.train(instances);
 
         System.out.println(dt);
     }
 
-    public List<Result> bulkRun(List<Instance> instances, int numberOfRuns, double testPercent) {
+    public List<Result> bulkRun(List<Instance> instances, int numberOfRuns, double trainPercent) {
         List<Result> resultList = new ArrayList<Result>();
 
+        System.out.println("running " + numberOfRuns + " simulations, with train percent of " + trainPercent);
+
         for (int run = 1; run <= numberOfRuns; run++) {
-            Pair<List<Instance>> instancesPair = splitDataSet(instances, testPercent);
+            Pair<List<Instance>> instancesPair = splitDataSet(instances, trainPercent);
             List<Instance> train = instancesPair.first;
             List<Instance> test = instancesPair.second;
 
@@ -37,8 +42,8 @@ public class Simulator {
     public Result evaluate(List<Instance> train, List<Instance> test) {
         Result result = new Result();
 
-        RandomDT dt = new RandomDT(random);
-        dt.train(train,true);
+        RandomDT dt = new RandomDT(random, useInformationGain, usePriors);
+        dt.train(train);
 
         for (Instance testInstance : test) {
             double classifiedLabel = dt.classify(testInstance);
@@ -56,9 +61,9 @@ public class Simulator {
 
         for (Instance instance : instances) {
             if (random.nextDouble() < percent) {
-                test.add(instance);
-            } else {
                 train.add(instance);
+            } else {
+                test.add(instance);
             }
         }
 
@@ -80,8 +85,8 @@ public class Simulator {
 
         System.out.println("\n*************************************************************");
         System.out.println("\t\t\t\t\t Classified as 1 \t\t Classified as 0");
-        System.out.println("Actual class is 1 \t\t"  + totalCorrect1   + "\t\t\t\t|\t\t" + totalInCorrect1);
-        System.out.println("Actual class is 0 \t\t"  + totalInCorrect0 + "\t\t\t\t|\t\t" + totalCorrect0);
+        System.out.println("Actual class is 1 \t\t" + totalCorrect1 + "\t\t\t\t|\t\t" + totalInCorrect1);
+        System.out.println("Actual class is 0 \t\t" + totalInCorrect0 + "\t\t\t\t|\t\t" + totalCorrect0);
     }
 
     public void plotOverallAccuracy(List<Result> results) {
@@ -118,13 +123,13 @@ public class Simulator {
         printStatistics(negativeAccuracy);
     }
 
-    private void printStatistics(List<Double> accuracy){
+    private void printStatistics(List<Double> accuracy) {
         Statistics st = new Statistics(accuracy);
         System.out.println("Max: " + st.getMax());
         System.out.println("Min: " + st.getMin());
         System.out.println("Median: " + st.getMedian());
-        System.out.println("Average: " +st.getMean());
-        System.out.println("Std: " +st.getStdDev());
+        System.out.println("Average: " + st.getMean());
+        System.out.println("Std: " + st.getStdDev());
     }
 
 }

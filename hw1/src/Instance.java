@@ -12,7 +12,7 @@ public class Instance {
 
     // instance label
     private double labelValue;
-        
+
     public Instance(List<Feature> features, double labelValue) {
         this.features = features;
         this.labelValue = labelValue;
@@ -93,5 +93,9 @@ public class Instance {
         sb.append("label=").append(labelValue);
 
         return sb.toString();
+    }
+
+    public List<Feature> getAllFeatures() {
+        return features;
     }
 }

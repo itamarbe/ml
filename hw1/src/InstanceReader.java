@@ -23,7 +23,7 @@ public class InstanceReader {
                 if (counter == 0) {
                     featureNames = parsedLine;
 
-                    // instances
+                // instances
                 } else {
                     if (featureNames.length != parsedLine.length) {
                         System.err.println("Feature names and values do not match, continue to next instance");
@@ -41,7 +41,7 @@ public class InstanceReader {
                 counter++;
             }
 
-            System.out.println("Successfully parsed " + counter + " lines");
+            System.out.println("Successfully parsed " + path + " with total of " + counter + " lines");
             br.close();
 
         } catch (FileNotFoundException e) {

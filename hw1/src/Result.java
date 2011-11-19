@@ -21,14 +21,23 @@ class Result {
     }
 
     public double getOverallAccuracy() {
-        return (double)(correct0 + correct1) / (correct0 + correct1 + incorrect0 + incorrect1);
+        double sum = correct0 + correct1 + incorrect0 + incorrect1;
+
+        if (sum == 0) return sum;
+
+        return (correct0 + correct1) / (sum);
     }
 
     public double getPositiveAccuracy() {
-        return (double)(correct1) / (correct1 + incorrect1);
+        double sum = correct1 + incorrect1;
+        if (sum == 0) return sum;
+
+        return (double) (correct1) / (sum);
     }
 
     public double getNegativeAccuracy() {
-        return (double)(correct0) / (correct0 + incorrect0);
+        double sum = correct0 + incorrect0;
+        if (sum == 0) return sum;
+        return (double) (correct0) / (sum);
     }
 }
