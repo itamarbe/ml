@@ -11,12 +11,20 @@ public class RandomDT {
 
     private Node root;
 
+    private Random random;
+
     /**
      * Creates a new instance of a Random Decision Tree.
      * Configuration options (if applicable), should be added here.
      */
     public RandomDT() {
+        random = new Random();
     }
+
+    public RandomDT(Random random) {
+        this.random = random;
+    }
+
 
     /**
      * Trains the Decision Tree.
@@ -24,9 +32,8 @@ public class RandomDT {
      * @param trainSet received set of Instance objects.
      */
     public void train(List<Instance> trainSet) {
-        root = recursiveSplit(trainSet);
+        root = recursiveTrainer(trainSet);
     }
-
 
     private boolean isOneClassOnly(List<Instance> instances) {
         double label = instances.get(0).getLabelValue();
@@ -40,103 +47,31 @@ public class RandomDT {
         return true;
     }
 
-    private Node recursiveSplit(List<Instance> instances) {
+    private Node recursiveTrainer(List<Instance> instances) {
         // stop condition
         if (instances.size() == 0) {
-            return null;
+            return new Node(random.nextInt(1));
         }
 
+        // stop condition
         if (isOneClassOnly(instances)) {
-            return new Leaf(instances);
+            return new Node(instances.get(0).getLabelValue());
         }
 
         // select a random feature
         else {
-            int featureIndex = getRandomFeatureIndex(instances);
-            if (getNumberOfFeatureValues(instances, featureIndex) == 1) {
-                return new SplitLeaf(getNumberOfPositiveLabels(instances), instances.size());
-            } else {
-                String featureName = instances.get(0).getFeatureName(featureIndex);
-                double splitValue = getRandomSplitValue(instances, featureIndex);
+            int featureIndex = getRandomFeature(instances);
+            String featureName = instances.get(0).getFeatureName(featureIndex);
+            double splitValue = getRandomSplitValue(instances, featureIndex);
 
-                Pair<List<Instance>> splitInstances = splitInstances(instances, featureIndex, splitValue);
-                Node left = recursiveSplit(splitInstances.first);
-                Node right = recursiveSplit(splitInstances.second);
+            Pair<List<Instance>> splitInstances = splitInstances(instances, featureIndex, splitValue);
 
-                return new Node(left, right, featureName, featureIndex, splitValue);
-            }
+            Node left = recursiveTrainer(splitInstances.first);
+            Node right = recursiveTrainer(splitInstances.second);
+
+            return new Node(left, right, featureName, featureIndex, splitValue);
         }
     }
-
-    private int getNumberOfPositiveLabels(List<Instance> instances) {
-        int counter = 0;
-        for (Instance instance : instances) {
-            if (instance.getLabelValue() == 1.0) {
-                counter++;
-            }
-        }
-        return counter;
-    }
-
-    public int getNumberOfFeatureValues(List<Instance> instances, int featureIndex) {
-        Set<Double> valueSet = new HashSet<Double>();
-        for (Instance instance : instances) {
-            valueSet.add(instance.getFeatureValue(featureIndex));
-        }
-        return valueSet.size();
-    }
-
-    public class Node {
-        public String featureName;
-
-        public int featureIndex;
-        public double splitValue;
-
-        public Node left = null;
-        public Node right = null;
-
-        public Node(Node left, Node right, String featureName, int featureIndex, double splitValue) {
-            this.left = left;
-            this.right = right;
-            this.featureName = featureName;
-            this.splitValue = splitValue;
-            this.featureIndex = featureIndex;
-        }
-
-        public Node() {
-        }
-    }
-
-    public class Leaf extends Node {
-        private double label;
-
-        public Leaf(Node left, Node right, String featureName, int featureIndex, double splitValue) {
-            super(left, right, featureName, featureIndex, splitValue);
-        }
-
-        public Leaf(List<Instance> instances) {
-            super(null, null, null, 0, 0.0);
-            this.label = instances.get(0).getLabelValue();
-        }
-
-    }
-
-    public class SplitLeaf extends Node {
-
-        public int numPositive;
-        public int numTotal;
-
-        public SplitLeaf(Node left, Node right, String featureName, int featureIndex, double splitValue) {
-            super(left, right, featureName, featureIndex, splitValue);
-        }
-
-        public SplitLeaf(int numPositive, int numTotal) {
-
-            this.numPositive = numPositive;
-            this.numTotal = numTotal;
-        }
-    }
-
 
     private Pair<List<Instance>> splitInstances(List<Instance> instances, int featureIndex, double splitValue) {
         List<Instance> lessThanValueInstances = new ArrayList<Instance>();
@@ -161,60 +96,42 @@ public class RandomDT {
         }
 
         Collections.shuffle(possibleValue, random);
-
         return possibleValue.get(0);
     }
 
-    private static Random random = new Random(0);
-
-    private int getRandomFeatureIndex(List<Instance> trainSet) {
+    private int getRandomFeature(List<Instance> trainSet) {
         Instance instance = trainSet.get(0);
 
         return (random.nextInt(instance.numFeatures()));
-
     }
 
     /**
      * Classify a given instance
      *
-     * @param instance
+     * @param current the current iterated node
+     * @param instance the instance that neended to be classified
      * @return the classification of the given instance.
      *         If the Decision Tree has not been trained, either throw an exception
      *         or return "-1", which stands for an empty Label value.
      */
-    public double classify(Instance instance) {
-        Node current = root;
-        while (true) {
-            if (current == null) {
-                System.out.println("Got null node :(");
-                return -1;
-            }
-            int featureIndex = current.featureIndex;
-            double splitValue = current.splitValue;
-            double instanceFeatureValue = instance.getFeatureValue(featureIndex);
+    public double recursiveClassifier(Node current, Instance instance) {
+        // need to choose whether to go left or right
+        if (current.getLabel() == null) {
+            double value = instance.getFeatureValue(current.getFeatureIndex());
 
-            if (instanceFeatureValue < splitValue) {
-                if (current.left instanceof Leaf) {
-                    return ((Leaf) (current.left)).label;
-                } else if (current.left instanceof SplitLeaf) {
-                    SplitLeaf s = (SplitLeaf) (current.left);
-                    return random.nextDouble() <= ((new Double(s.numPositive)) / (new Double(s.numTotal))) ? 1.0 : 0.0;
-                } else {
-                    current = current.left;
-                    continue;
-                }
+            if (value < current.getSplitValue()) {
+                return recursiveClassifier(current.getLeft(), instance);
             } else {
-                if (current.right instanceof Leaf) {
-                    return ((Leaf) (current.right)).label;
-                } else if (current.right instanceof SplitLeaf) {
-                    SplitLeaf s = (SplitLeaf) (current.right);
-                    return random.nextDouble() <= ((new Double(s.numPositive)) / (new Double(s.numTotal))) ? 1.0 : 0.0;
-                } else {
-                    current = current.right;
-                    continue;
-                }
+                return recursiveClassifier(current.getRight(), instance);
             }
         }
+
+        // we reached to a leaf
+        return current.getLabel();
+    }
+
+    public double classify(Instance instance) {
+        return recursiveClassifier(root, instance);
     }
 
     /**
@@ -227,27 +144,18 @@ public class RandomDT {
     }
 
     private String printNode(Node node, int indentDepth) {
-        String prefixSequence = "--|";
         StringBuilder prefixString = new StringBuilder();
+
         for (int i = 0; i < indentDepth; i++) {
-            prefixString.append(prefixSequence);
-        }
-        if (node == null) {
-            return "";
+            prefixString.append("--|");
         }
 
-        if (node instanceof Leaf) {
-            Leaf l = (Leaf) node;
-            return " (" + Double.toString(l.label) + ")";
-        }
-        if (node instanceof SplitLeaf) {
-            SplitLeaf s = (SplitLeaf) node;
-            return " ({" + s.numPositive + "," + (s.numTotal - s.numPositive) + "})";
-        }
+        // we reached to a classification leaf
+        if (node.getLabel() != null) return " (" + node.getLabel() + ")";
 
-        return "\n" + prefixString.toString() + (node.featureName + " < " + node.splitValue) +
-                printNode(node.left, indentDepth + 1) +
-                "\n" + prefixString.toString() + (node.featureName + " >= " + node.splitValue) +
-                printNode(node.right, indentDepth + 1);
+        return "\n" + prefixString.toString() + (node.getFeatureName() + " < " + node.getSplitValue()) +
+                printNode(node.getLeft(), indentDepth + 1) +
+                "\n" + prefixString.toString() + (node.getFeatureName() + " >= " + node.getSplitValue()) +
+                printNode(node.getRight(), indentDepth + 1);
     }
 }
