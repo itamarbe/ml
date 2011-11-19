@@ -15,7 +15,7 @@ public class Simulator {
 
     public void plotDecisionTree(List<Instance> instances){
         RandomDT dt = new RandomDT(random);
-        dt.train(instances);
+        dt.train(instances,false);
 
         System.out.println(dt);
     }
@@ -38,7 +38,7 @@ public class Simulator {
         Result result = new Result();
 
         RandomDT dt = new RandomDT(random);
-        dt.train(train);
+        dt.train(train,true);
 
         for (Instance testInstance : test) {
             double classifiedLabel = dt.classify(testInstance);

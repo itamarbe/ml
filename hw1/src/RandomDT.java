@@ -8,7 +8,9 @@ import java.util.*;
  * The splitting value used is also selected randomly.
  */
 public class RandomDT {
-
+    private static double log2(double number) {
+        return (Math.log(number)/Math.log(2));
+    }
     private Node root;
 
     private Random random;
@@ -31,8 +33,8 @@ public class RandomDT {
      *
      * @param trainSet received set of Instance objects.
      */
-    public void train(List<Instance> trainSet) {
-        root = recursiveTrainer(trainSet);
+    public void train(List<Instance> trainSet,boolean useInformationGain) {
+        root = recursiveTrainer(trainSet,useInformationGain);
     }
 
     private boolean isOneClassOnly(List<Instance> instances) {
@@ -47,7 +49,7 @@ public class RandomDT {
         return true;
     }
 
-    private Node recursiveTrainer(List<Instance> instances) {
+    private Node recursiveTrainer(List<Instance> instances,boolean useInformationGain) {
         // stop condition
         if (instances.size() == 0) {
             return new Node(random.nextInt(1));
@@ -62,15 +64,57 @@ public class RandomDT {
         else {
             int featureIndex = getRandomFeature(instances);
             String featureName = instances.get(0).getFeatureName(featureIndex);
-            double splitValue = getRandomSplitValue(instances, featureIndex);
+            double splitValue = useInformationGain?getGainSplitValue(instances,featureIndex):getRandomSplitValue(instances, featureIndex);
 
             Pair<List<Instance>> splitInstances = splitInstances(instances, featureIndex, splitValue);
 
-            Node left = recursiveTrainer(splitInstances.first);
-            Node right = recursiveTrainer(splitInstances.second);
+            Node left = recursiveTrainer(splitInstances.first,useInformationGain);
+            Node right = recursiveTrainer(splitInstances.second,useInformationGain);
 
             return new Node(left, right, featureName, featureIndex, splitValue);
         }
+    }
+
+    private double calculateEntropy(List<Instance> instances) {
+        double numberPositives = 0.0;
+        double numberNegatives = 0.0;
+        double total = instances.size();
+        for (Instance instance : instances) {
+            if (instance.getLabelValue() == 1.0) {
+                numberPositives += 1.0;
+            } else {
+                numberNegatives += 1.0;
+            }
+        }
+        double positiveProbability = numberPositives/total;
+        double negativeProbability = numberNegatives/total;
+        return -positiveProbability*log2(positiveProbability)-negativeProbability*log2(negativeProbability);
+    }
+
+    private double getGainSplitValue(List<Instance> instances, int featureIndex) {
+        Map<Double,List<Instance>> valueListMap = new HashMap<Double, List<Instance>>();
+        for (Instance instance : instances) {
+            Double value = instance.getFeatureValue(featureIndex);
+            if (valueListMap.containsKey(value)) {
+                valueListMap.get(value).add(instance);
+            }
+            else {
+                List<Instance> valueList = new ArrayList<Instance>();
+                valueList.add(instance);
+                valueListMap.put(value,valueList);
+            }
+        }
+        double bestEntropy = 1.01;
+        double bestEntropySplitValue = 0.0;
+        for (Double currentSplitValue: valueListMap.keySet()) {
+            List<Instance> listInstance = valueListMap.get(currentSplitValue);
+            double currentEntropy = calculateEntropy(listInstance);
+            if (currentEntropy < bestEntropy) {
+                bestEntropy = currentEntropy;
+                bestEntropySplitValue = currentSplitValue;
+            }
+        }
+        return bestEntropySplitValue;
     }
 
     private Pair<List<Instance>> splitInstances(List<Instance> instances, int featureIndex, double splitValue) {
