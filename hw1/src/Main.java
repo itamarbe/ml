@@ -8,7 +8,7 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        String path = "/data/liver-disorders.csv";
+        String path = "./data/liver-disorders.csv";
 
         boolean randomize = true;
         boolean useInformationGain = false;
@@ -31,7 +31,7 @@ public class Main {
         sim.plotNegativeAccuracy(results);
 
         // section e.a
-        sim.plotDecisionTree(instances);
+        //sim.plotDecisionTree(instances);
 
         // section e.b
         sim.plotConfusionMatrix(results);
@@ -39,7 +39,6 @@ public class Main {
         // section f
         final double positivePrior = RandomDT.getPositivePrior(instances);
         System.out.println("\nDataset positive prior: " + positivePrior + ", negative prior: " + (1 - positivePrior));
-
     }
 
 
