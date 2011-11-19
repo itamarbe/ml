@@ -1,9 +1,4 @@
-import org.omg.PortableInterceptor.NON_EXISTENT;
-
-import java.awt.*;
-import java.awt.geom.Path2D;
 import java.util.*;
-import java.util.List;
 
 /**
  * Assumes that all Features are continuous.
@@ -47,7 +42,7 @@ public class RandomDT {
 
     private Node recursiveSplit(List<Instance> instances) {
         // stop condition
-        if (instances.size() == 0 ) {
+        if (instances.size() == 0) {
             return null;
         }
 
@@ -58,8 +53,8 @@ public class RandomDT {
         // select a random feature
         else {
             int featureIndex = getRandomFeatureIndex(instances);
-            if (getNumberOfFeatureValues(instances,featureIndex)==1) {
-                return new SplitLeaf(getNumberOfPositiveLabels(instances),instances.size());
+            if (getNumberOfFeatureValues(instances, featureIndex) == 1) {
+                return new SplitLeaf(getNumberOfPositiveLabels(instances), instances.size());
             } else {
                 String featureName = instances.get(0).getFeatureName(featureIndex);
                 double splitValue = getRandomSplitValue(instances, featureIndex);
@@ -83,7 +78,7 @@ public class RandomDT {
         return counter;
     }
 
-    public int getNumberOfFeatureValues(List<Instance> instances,int featureIndex) {
+    public int getNumberOfFeatureValues(List<Instance> instances, int featureIndex) {
         Set<Double> valueSet = new HashSet<Double>();
         for (Instance instance : instances) {
             valueSet.add(new Double(instance.getFeatureValue(featureIndex)));
@@ -98,9 +93,9 @@ public class RandomDT {
 
         public double splitValue;
 
-        public Node left=null;
+        public Node left = null;
 
-        public Node right=null;
+        public Node right = null;
 
         public Node(Node left, Node right, String featureName, int featureIndex, double splitValue) {
             this.left = left;
@@ -122,8 +117,8 @@ public class RandomDT {
         }
 
         public Leaf(List<Instance> instances) {
-            super(null,null,null,0, 0.0);
-            this.label=instances.get(0).getLabelValue();
+            super(null, null, null, 0, 0.0);
+            this.label = instances.get(0).getLabelValue();
         }
 
     }
@@ -137,7 +132,7 @@ public class RandomDT {
             super(left, right, featureName, featureIndex, splitValue);
         }
 
-        public SplitLeaf(int numPositive,int numTotal) {
+        public SplitLeaf(int numPositive, int numTotal) {
 
             this.numPositive = numPositive;
             this.numTotal = numTotal;
@@ -189,7 +184,7 @@ public class RandomDT {
      *         If the Decision Tree has not been trained, either throw an exception
      *         or return "-1", which stands for an empty Label value.
      */
-    public double classify(Instance instance)  {
+    public double classify(Instance instance) {
         Node current = root;
         while (true) {
             if (current == null) {
@@ -199,22 +194,23 @@ public class RandomDT {
             int featureIndex = current.featureIndex;
             double splitValue = current.splitValue;
             double instanceFeatureValue = instance.getFeatureValue(featureIndex);
+
             if (instanceFeatureValue < splitValue) {
                 if (current.left instanceof Leaf) {
-                    return ((Leaf)(current.left)).label;
-                } else if (current.left instanceof SplitLeaf ) {
-                    SplitLeaf s = (SplitLeaf)(current.left);
-                    return random.nextDouble()<=((new Double(s.numPositive))/(new Double(s.numTotal)))?1.0:0.0;
+                    return ((Leaf) (current.left)).label;
+                } else if (current.left instanceof SplitLeaf) {
+                    SplitLeaf s = (SplitLeaf) (current.left);
+                    return random.nextDouble() <= ((new Double(s.numPositive)) / (new Double(s.numTotal))) ? 1.0 : 0.0;
                 } else {
                     current = current.left;
                     continue;
                 }
             } else {
                 if (current.right instanceof Leaf) {
-                    return ((Leaf)(current.right)).label;
-                } else if (current.right instanceof SplitLeaf ) {
-                    SplitLeaf s = (SplitLeaf)(current.right);
-                    return random.nextDouble()<=((new Double(s.numPositive))/(new Double(s.numTotal)))?1.0:0.0;
+                    return ((Leaf) (current.right)).label;
+                } else if (current.right instanceof SplitLeaf) {
+                    SplitLeaf s = (SplitLeaf) (current.right);
+                    return random.nextDouble() <= ((new Double(s.numPositive)) / (new Double(s.numTotal))) ? 1.0 : 0.0;
                 } else {
                     current = current.right;
                     continue;
@@ -229,13 +225,13 @@ public class RandomDT {
      */
     @Override
     public String toString() {
-        return printNode(root,0);
+        return printNode(root, 0);
     }
 
-    private String printNode(Node node,int indentDepth) {
+    private String printNode(Node node, int indentDepth) {
         String prefixSequence = "--|";
         StringBuilder prefixString = new StringBuilder();
-        for (int i=0;i<indentDepth;i++) {
+        for (int i = 0; i < indentDepth; i++) {
             prefixString.append(prefixSequence);
         }
         if (node == null) {
@@ -243,17 +239,17 @@ public class RandomDT {
         }
 
         if (node instanceof Leaf) {
-            Leaf l = (Leaf)node;
+            Leaf l = (Leaf) node;
             return " (" + Double.toString(l.label) + ")";
         }
         if (node instanceof SplitLeaf) {
-            SplitLeaf s = (SplitLeaf)node;
-            return " ({" + s.numPositive + "," + (s.numTotal-s.numPositive) + "})";
+            SplitLeaf s = (SplitLeaf) node;
+            return " ({" + s.numPositive + "," + (s.numTotal - s.numPositive) + "})";
         }
 
         return "\n" + prefixString.toString() + (node.featureName + " < " + node.splitValue) +
-               printNode(node.left,indentDepth+1) +
-               "\n" + prefixString.toString() + (node.featureName + " >= " + node.splitValue )+
-               printNode(node.right,indentDepth+1);
+                printNode(node.left, indentDepth + 1) +
+                "\n" + prefixString.toString() + (node.featureName + " >= " + node.splitValue) +
+                printNode(node.right, indentDepth + 1);
     }
 }

@@ -41,7 +41,7 @@ public class InstanceReader {
                 counter++;
             }
 
-            System.out.println("Parsed " + counter + " lines");
+            System.out.println("Successfully parsed " + counter + " lines");
             br.close();
 
         } catch (FileNotFoundException e) {
