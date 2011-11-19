@@ -113,15 +113,30 @@ public class RandomDT {
         else {
             int featureIndex = getRandomFeature(instances);
             String featureName = instances.get(0).getFeatureName(featureIndex);
+            if (singleValueFeature(instances, featureIndex)) {
+                double positivePrior = getPositivePrior(instances);
+                return new Node((positivePrior>=0.5)?1.0:0.0);
+            }
             double splitValue = useInformationGain ? getGainSplitValue(instances, featureIndex) : getRandomSplitValue(instances, featureIndex);
 
             Pair<List<Instance>> splitInstances = splitInstances(instances, featureIndex, splitValue);
+            if ((splitInstances.first.size()==0) || (splitInstances.second.size()==0)) {
+                double splitValue2 = useInformationGain ? getGainSplitValue(instances, featureIndex) : getRandomSplitValue(instances, featureIndex);
+            }
 
             Node left = recursiveTrainer(splitInstances.first);
             Node right = recursiveTrainer(splitInstances.second);
 
             return new Node(left, right, featureName, featureIndex, splitValue);
         }
+    }
+
+    private boolean singleValueFeature(List<Instance> instances, int featureIndex) {
+        double firstValue = instances.get(0).getFeatureValue(featureIndex);
+        for (Instance instance : instances) {
+            if (instance.getFeatureValue(featureIndex)!=firstValue) return false;
+        }
+        return true;
     }
 
     private double calculateEntropy(List<Instance> instances) {
@@ -137,13 +152,18 @@ public class RandomDT {
         }
         double positiveProbability = numberPositives / total;
         double negativeProbability = numberNegatives / total;
-        return -positiveProbability * log2(positiveProbability) - negativeProbability * log2(negativeProbability);
+        return -(positiveProbability>0.0?(positiveProbability * log2(positiveProbability)):0.0) - (negativeProbability>0.0?(negativeProbability * log2(negativeProbability)):0.0);
     }
 
     private double getGainSplitValue(List<Instance> instances, int featureIndex) {
         Map<Double, List<Instance>> valueListMap = new HashMap<Double, List<Instance>>();
+        Double firstSplitValue = instances.get(0).getFeatureValue(featureIndex);
+        Double secondSplitValue = firstSplitValue;
+        Double minSplitValue = firstSplitValue;
         for (Instance instance : instances) {
             Double value = instance.getFeatureValue(featureIndex);
+            if (value<minSplitValue) minSplitValue = value;
+            if (!value.equals(firstSplitValue)) secondSplitValue = value;
             if (valueListMap.containsKey(value)) {
                 valueListMap.get(value).add(instance);
             } else {
@@ -152,12 +172,12 @@ public class RandomDT {
                 valueListMap.put(value, valueList);
             }
         }
-        double bestEntropy = 1.01;
-        double bestEntropySplitValue = 0.0;
+        double bestEntropy = -1.0;
+        double bestEntropySplitValue = (firstSplitValue!=minSplitValue)?firstSplitValue:secondSplitValue;
         for (Double currentSplitValue : valueListMap.keySet()) {
             List<Instance> listInstance = valueListMap.get(currentSplitValue);
             double currentEntropy = calculateEntropy(listInstance);
-            if (currentEntropy < bestEntropy) {
+            if ((currentEntropy >= bestEntropy) && (!currentSplitValue.equals(minSplitValue))) {
                 bestEntropy = currentEntropy;
                 bestEntropySplitValue = currentSplitValue;
             }
@@ -257,7 +277,7 @@ public class RandomDT {
 
     public Node getNewDefaultLabel() {
         if (usePriors) {
-            double label = (random.nextDouble() < posClassPrior) ? 1 : 0;
+            double label = (posClassPrior >= 0.5) ? 1 : 0;
             return new Node(label);
         }
 
