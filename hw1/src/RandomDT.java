@@ -81,7 +81,7 @@ public class RandomDT {
     public int getNumberOfFeatureValues(List<Instance> instances, int featureIndex) {
         Set<Double> valueSet = new HashSet<Double>();
         for (Instance instance : instances) {
-            valueSet.add(new Double(instance.getFeatureValue(featureIndex)));
+            valueSet.add(instance.getFeatureValue(featureIndex));
         }
         return valueSet.size();
     }
@@ -90,11 +90,9 @@ public class RandomDT {
         public String featureName;
 
         public int featureIndex;
-
         public double splitValue;
 
         public Node left = null;
-
         public Node right = null;
 
         public Node(Node left, Node right, String featureName, int featureIndex, double splitValue) {

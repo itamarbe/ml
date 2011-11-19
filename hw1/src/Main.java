@@ -11,6 +11,8 @@ public class Main {
 
     private static Random random = new Random(0); //TODO: replace seed
 
+    private static boolean printTree = false;
+
     public static void main(String[] args) {
         String path = "/home/amir/school/ml/hw1/data/liver-disorders.csv";
 
@@ -21,7 +23,28 @@ public class Main {
         // load instances
         final List<Instance> instances = Instance.loadInstances(path);
 
-        List<Result> results = bulkRun(instances, 2, 0.2);
+        List<Result> results = bulkRun(instances, 10, 0.3);
+
+        plotConfusionMatrix(results);
+    }
+
+
+    private static void plotConfusionMatrix(List<Result> results) {
+        int totalCorrect0 = 0;
+        int totalCorrect1 = 0;
+        int totalInCorrect0 = 0;
+        int totalInCorrect1 = 0;
+
+        for (Result result : results) {
+            totalCorrect0 += result.correct0;
+            totalCorrect1 += result.correct1;
+            totalInCorrect0 += result.incorrect0;
+            totalInCorrect1 += result.incorrect1;
+        }
+
+        System.out.println("\t\t\t\t\t Classified as 1 \t\t Classified as 0");
+        System.out.println("Actual class is 1 \t\t"  + totalCorrect1   + "\t\t\t\t|\t\t" + totalInCorrect1);
+        System.out.println("Actual class is 0 \t\t"  + totalInCorrect0 + "\t\t\t\t|\t\t" + totalCorrect0);
     }
 
     private static List<Result> bulkRun(List<Instance> instances, int numberOfRuns, double testPercent) {
@@ -45,6 +68,9 @@ public class Main {
 
         RandomDT dt = new RandomDT();
         dt.train(train);
+
+        if (printTree)
+            System.out.println(dt);
 
         for (Instance testInstance : test) {
             double classifiedLabel = dt.classify(testInstance);
