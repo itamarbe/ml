@@ -8,7 +8,7 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        String path = "./data/liver-disorders.csv" ;
+        String path = "./data/liver-disorders.csv"   ;
 
         boolean randomize = true;
         boolean useInformationGain = false;
