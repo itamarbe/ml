@@ -19,4 +19,16 @@ class Result {
             }
         }
     }
+
+    public double getOverallAccuracy() {
+        return (double)(correct0 + correct1) / (correct0 + correct1 + incorrect0 + incorrect1);
+    }
+
+    public double getPositiveAccuracy() {
+        return (double)(correct1) / (correct1 + incorrect1);
+    }
+
+    public double getNegativeAccuracy() {
+        return (double)(correct0) / (correct0 + incorrect0);
+    }
 }

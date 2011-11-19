@@ -21,15 +21,25 @@ public class Main {
 
         // load instances
         final List<Instance> instances = Instance.loadInstances(path);
-
         Simulator sim = new Simulator(randomize);
 
-        sim.plotDecisionTree(instances);
-        
+        // section c
         List<Result> results = sim.bulkRun(instances, 100, 0.3);
 
-        sim.plotConfusionMatrix(results);
+        // section d
+        sim.plotOverallAccuracy(results);
+        sim.plotPositiveAccuracy(results);
+        sim.plotNegativeAccuracy(results);
 
+        // section e.a
+//        sim.plotDecisionTree(instances);
+
+        // section e.b
+        sim.plotConfusionMatrix(results);
     }
+
+
+
+    
 
 }

@@ -28,8 +28,6 @@ public class Simulator {
             List<Instance> train = instancesPair.first;
             List<Instance> test = instancesPair.second;
 
-            System.out.println("Starting run #" + run + " [train: " + train.size() + ", test:" + test.size() + "]");
-
             resultList.add(evaluate(train, test));
         }
 
@@ -80,8 +78,53 @@ public class Simulator {
             totalInCorrect1 += result.incorrect1;
         }
 
+        System.out.println("\n*************************************************************");
         System.out.println("\t\t\t\t\t Classified as 1 \t\t Classified as 0");
         System.out.println("Actual class is 1 \t\t"  + totalCorrect1   + "\t\t\t\t|\t\t" + totalInCorrect1);
         System.out.println("Actual class is 0 \t\t"  + totalInCorrect0 + "\t\t\t\t|\t\t" + totalCorrect0);
     }
+
+    public void plotOverallAccuracy(List<Result> results) {
+        List<Double> overallAccuracy = new ArrayList<Double>();
+        for (Result result : results) {
+            overallAccuracy.add(result.getOverallAccuracy());
+        }
+
+        System.out.println("\n******************");
+        System.out.println("Overall accuracy:");
+        printStatistics(overallAccuracy);
+    }
+
+    public void plotPositiveAccuracy(List<Result> results) {
+        List<Double> positiveAccuracy = new ArrayList<Double>();
+        for (Result result : results) {
+            positiveAccuracy.add(result.getPositiveAccuracy());
+        }
+
+        System.out.println("\n******************");
+        System.out.println("Positive accuracy:");
+        printStatistics(positiveAccuracy);
+
+    }
+
+    public void plotNegativeAccuracy(List<Result> results) {
+        List<Double> negativeAccuracy = new ArrayList<Double>();
+        for (Result result : results) {
+            negativeAccuracy.add(result.getNegativeAccuracy());
+        }
+
+        System.out.println("\n******************");
+        System.out.println("Negative accuracy:");
+        printStatistics(negativeAccuracy);
+    }
+
+    private void printStatistics(List<Double> accuracy){
+        Statistics st = new Statistics(accuracy);
+        System.out.println("Max: " + st.getMax());
+        System.out.println("Min: " + st.getMin());
+        System.out.println("Median: " + st.getMedian());
+        System.out.println("Average: " +st.getMean());
+        System.out.println("Std: " +st.getStdDev());
+    }
+
 }
