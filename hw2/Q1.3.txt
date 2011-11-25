@@ -1,0 +1,53 @@
+=== Run information ===
+
+Scheme:       weka.classifiers.functions.VotedPerceptron -I 1 -E 1.0 -S 1 -M 10000
+Relation:     sonar-weka.filters.unsupervised.attribute.Remove-R3,5-7,9-10,12-17,19-20,22,24-26,29-50,52,55-60
+Instances:    208
+Attributes:   14
+              attribute_1
+              attribute_2
+              attribute_4
+              attribute_8
+              attribute_11
+              attribute_18
+              attribute_21
+              attribute_23
+              attribute_27
+              attribute_28
+              attribute_51
+              attribute_53
+              attribute_54
+              Class
+Test mode:    10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+VotedPerceptron: Number of perceptrons=96
+
+Time taken to build model: 0 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances         136               65.3846 %
+Incorrectly Classified Instances        72               34.6154 %
+Kappa statistic                          0.2879
+Mean absolute error                      0.3501
+Root mean squared error                  0.5862
+Relative absolute error                 70.3254 %
+Root relative squared error            117.4885 %
+Total Number of Instances              208     
+
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.443     0.162      0.705     0.443     0.544      0.693    Rock
+                 0.838     0.557      0.633     0.838     0.721      0.693    Mine
+Weighted Avg.    0.654     0.373      0.666     0.654     0.639      0.693
+
+=== Confusion Matrix ===
+
+  a  b   <-- classified as
+ 43 54 |  a = Rock
+ 18 93 |  b = Mine
+

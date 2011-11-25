@@ -1,0 +1,141 @@
+=== Run information ===
+
+Scheme:       weka.classifiers.trees.J48 -C 0.25 -M 2
+Relation:     sonar
+Instances:    208
+Attributes:   61
+              attribute_1
+              attribute_2
+              attribute_3
+              attribute_4
+              attribute_5
+              attribute_6
+              attribute_7
+              attribute_8
+              attribute_9
+              attribute_10
+              attribute_11
+              attribute_12
+              attribute_13
+              attribute_14
+              attribute_15
+              attribute_16
+              attribute_17
+              attribute_18
+              attribute_19
+              attribute_20
+              attribute_21
+              attribute_22
+              attribute_23
+              attribute_24
+              attribute_25
+              attribute_26
+              attribute_27
+              attribute_28
+              attribute_29
+              attribute_30
+              attribute_31
+              attribute_32
+              attribute_33
+              attribute_34
+              attribute_35
+              attribute_36
+              attribute_37
+              attribute_38
+              attribute_39
+              attribute_40
+              attribute_41
+              attribute_42
+              attribute_43
+              attribute_44
+              attribute_45
+              attribute_46
+              attribute_47
+              attribute_48
+              attribute_49
+              attribute_50
+              attribute_51
+              attribute_52
+              attribute_53
+              attribute_54
+              attribute_55
+              attribute_56
+              attribute_57
+              attribute_58
+              attribute_59
+              attribute_60
+              Class
+Test mode:    10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+J48 pruned tree
+------------------
+
+attribute_11 <= 0.197
+|   attribute_1 <= 0.0392
+|   |   attribute_4 <= 0.0539
+|   |   |   attribute_28 <= 0.9578
+|   |   |   |   attribute_27 <= 0.2771
+|   |   |   |   |   attribute_2 <= 0.0378: Mine (2.0)
+|   |   |   |   |   attribute_2 > 0.0378: Rock (2.0)
+|   |   |   |   attribute_27 > 0.2771: Rock (56.0)
+|   |   |   attribute_28 > 0.9578
+|   |   |   |   attribute_2 <= 0.0253: Rock (2.0)
+|   |   |   |   attribute_2 > 0.0253: Mine (3.0)
+|   |   attribute_4 > 0.0539
+|   |   |   attribute_21 <= 0.7894
+|   |   |   |   attribute_18 <= 0.2613: Mine (2.0)
+|   |   |   |   attribute_18 > 0.2613: Rock (6.0)
+|   |   |   attribute_21 > 0.7894: Mine (6.0)
+|   attribute_1 > 0.0392: Mine (8.0/1.0)
+attribute_11 > 0.197
+|   attribute_27 <= 0.8145
+|   |   attribute_54 <= 0.0205
+|   |   |   attribute_53 <= 0.0166
+|   |   |   |   attribute_21 <= 0.5959: Rock (14.0)
+|   |   |   |   attribute_21 > 0.5959
+|   |   |   |   |   attribute_51 <= 0.0153
+|   |   |   |   |   |   attribute_23 <= 0.7867: Rock (13.0/1.0)
+|   |   |   |   |   |   attribute_23 > 0.7867: Mine (6.0/1.0)
+|   |   |   |   |   attribute_51 > 0.0153: Mine (7.0)
+|   |   |   attribute_53 > 0.0166: Mine (12.0/1.0)
+|   |   attribute_54 > 0.0205: Mine (13.0)
+|   attribute_27 > 0.8145
+|   |   attribute_8 <= 0.0697
+|   |   |   attribute_2 <= 0.0222: Mine (3.0)
+|   |   |   attribute_2 > 0.0222: Rock (2.0)
+|   |   attribute_8 > 0.0697: Mine (51.0)
+
+Number of Leaves  : 	18
+
+Size of the tree : 	35
+
+
+Time taken to build model: 0.11 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances         148               71.1538 %
+Incorrectly Classified Instances        60               28.8462 %
+Kappa statistic                          0.422 
+Mean absolute error                      0.2863
+Root mean squared error                  0.5207
+Relative absolute error                 57.5045 %
+Root relative squared error            104.3706 %
+Total Number of Instances              208     
+
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.711     0.288      0.683     0.711     0.697      0.743    Rock
+                 0.712     0.289      0.738     0.712     0.725      0.743    Mine
+Weighted Avg.    0.712     0.288      0.713     0.712     0.712      0.743
+
+=== Confusion Matrix ===
+
+  a  b   <-- classified as
+ 69 28 |  a = Rock
+ 32 79 |  b = Mine
+

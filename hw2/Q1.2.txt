@@ -1,0 +1,91 @@
+=== Run information ===
+
+Scheme:       weka.classifiers.functions.VotedPerceptron -I 1 -E 1.0 -S 1 -M 10000
+Relation:     sonar-weka.filters.unsupervised.attribute.Remove-R9,16,21-22,39,41,54,56,58
+Instances:    208
+Attributes:   52
+              attribute_1
+              attribute_2
+              attribute_3
+              attribute_4
+              attribute_5
+              attribute_6
+              attribute_7
+              attribute_8
+              attribute_10
+              attribute_11
+              attribute_12
+              attribute_13
+              attribute_14
+              attribute_15
+              attribute_17
+              attribute_18
+              attribute_19
+              attribute_20
+              attribute_23
+              attribute_24
+              attribute_25
+              attribute_26
+              attribute_27
+              attribute_28
+              attribute_29
+              attribute_30
+              attribute_31
+              attribute_32
+              attribute_33
+              attribute_34
+              attribute_35
+              attribute_36
+              attribute_37
+              attribute_38
+              attribute_40
+              attribute_42
+              attribute_43
+              attribute_44
+              attribute_45
+              attribute_46
+              attribute_47
+              attribute_48
+              attribute_49
+              attribute_50
+              attribute_51
+              attribute_52
+              attribute_53
+              attribute_55
+              attribute_57
+              attribute_59
+              attribute_60
+              Class
+Test mode:    10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+VotedPerceptron: Number of perceptrons=92
+
+Time taken to build model: 0.01 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances         150               72.1154 %
+Incorrectly Classified Instances        58               27.8846 %
+Kappa statistic                          0.4346
+Mean absolute error                      0.2776
+Root mean squared error                  0.5218
+Relative absolute error                 55.7544 %
+Root relative squared error            104.5918 %
+Total Number of Instances              208     
+
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.629     0.198      0.735     0.629     0.678      0.771    Rock
+                 0.802     0.371      0.712     0.802     0.754      0.777    Mine
+Weighted Avg.    0.721     0.29       0.723     0.721     0.719      0.774
+
+=== Confusion Matrix ===
+
+  a  b   <-- classified as
+ 61 36 |  a = Rock
+ 22 89 |  b = Mine
+
