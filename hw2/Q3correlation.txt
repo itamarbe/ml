@@ -1,0 +1,4 @@
+q3.1 - coefficient = 0
+q3.2 - coefficient = 0.9687
+q3.3 - coefficient = -0.0284
+q3.4 - coefficient = 0.3128
