@@ -1,0 +1,13 @@
+1. A correlation coefficient of 1 is expected, since the class of each instance is a multiple of a linear combination of the attributes (the average is the sum divided by 10, the number of attributes).  All the instances lie on a line in R^11 (10 attributes + label) - therefore there is a perfect linear regression where every point (attributes,lable) is on the line of the linear regression, which means the distance from the line is 0 for every point, which results in a correlation coefficient of exactly 1.
+
+2. The correlation coefficient is almost 1 (0.9687) because there is a correlation between a linear combination of the attributes and the label but the correlation is quadratic - since the label is literally a square of the average of the attributes, we can consider the denominator to be a constant (10^2=100), so all the instances lie on a quadratic line in R^11.  The value 0.9687 is the approximate average distance between f(x)=sigma[xi] and f(x)=sigma[xi^2] where 0<=f(x)<=1 and x is a vector in R^10 dimensions such that for every attribute 0<=xi<=1).  The average distance is approximate because the distance is "sampled" in 10000 spots in R^11 (one for each instance).
+
+3. The correlation coefficient is approximately 0 (-0.0284) because the label is randomly chosen independent of the attributes, therefore E(XY)=E(X)*E(Y), so cov(X,Y)=E(XY)-E(X)E(Y)=E(X)*E(Y)-E(X)*E(Y)=0.  Since the covariance is the numerator of the correlation coefficient, the coefficient is 0.
+
+4. The correlation coeffiicent is approximately 0.3 (0.3128) because we are mixing two pairs of random variables:
+X1,Y1 - from previous question 2
+X2,Y2 - from previous question 3
+where Xi are the attributes and Yi are the labels
+we note that X1 and X2 are the same random variable therefore X1=X2=X
+From the properties of covariance:
+Cov(0.3*X1+0.7*X2,0.3*Y1+0.7*Y2)=Cov(0*X+1*X,0.3*Y1+0.7*Y2)=0.3*Cov(X,Y1)+0.7*Cov(X,Y2) ~= 0.3*1+0.7*0 = 0.3
