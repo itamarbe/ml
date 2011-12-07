@@ -4,7 +4,6 @@ import weka.core.Instances;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class Perceptron extends AbstractClassifier {
     private static final long serialVersionUID = 1234567890L;
@@ -12,10 +11,8 @@ public class Perceptron extends AbstractClassifier {
     private double eta;
     private int numIterations;
     private double[] weights;
-    private Random random;
 
     public Perceptron() {
-        random = new Random();
         eta = 1; //default value
         numIterations = 100; //default value
     }
@@ -62,9 +59,9 @@ public class Perceptron extends AbstractClassifier {
     /**
      * Classifies the given instance using the perceptron.
      * The value returned corresponds to the (0-based) index of the predicted
-     * nominal class. For example – if the labels in the arff are defined as
-     * { Yes, No }, then when the classifier predicts “Yes” this method will
-     * return 0, and when the classifier predicts “No” this method will return 1.
+     * nominal class. For example ï¿½ if the labels in the arff are defined as
+     * { Yes, No }, then when the classifier predicts ï¿½Yesï¿½ this method will
+     * return 0, and when the classifier predicts ï¿½Noï¿½ this method will return 1.
      */
     public double classifyInstance(Instance inst) throws Exception {
         double perceptronTotal = 0.0;
@@ -76,7 +73,7 @@ public class Perceptron extends AbstractClassifier {
     private void initializeWeights(int numAttributes) {
         weights = new double[numAttributes];
         for (int i = 0; i < numAttributes; i++)
-            weights[i] = random.nextDouble();
+            weights[i] = 0;
     }
 
     private List<Double> calculateSigns(Instances insts) {
