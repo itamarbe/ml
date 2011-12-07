@@ -13,8 +13,8 @@ public class Perceptron extends AbstractClassifier {
     private double[] weights;
 
     public Perceptron() {
-        eta = 1; //default value
-        numIterations = 100; //default value
+        eta = 1;                 //default value
+        numIterations = 100;     //default value
     }
 
     /**
@@ -43,7 +43,7 @@ public class Perceptron extends AbstractClassifier {
             throw new Exception("Can't build classifier for empty instances list");
 
         // initialize weights
-        initializeWeights(insts.numAttributes());
+        initializeWeights(insts.numAttributes()); // include the bias
 
         // until termination do
         for (int iteration = 0; iteration < numIterations; iteration++) {
@@ -51,29 +51,33 @@ public class Perceptron extends AbstractClassifier {
             List<Double> instanceSigns = calculateSigns(insts);
 
             // for each linear unit weight w do
-            for (int weightIndex = 0; weightIndex < weights.length; weightIndex++)
+            for (int weightIndex = 0; weightIndex < weights.length; weightIndex++) {
                 weights[weightIndex] += calculateWeightDelta(weightIndex, insts, instanceSigns);
+            }
         }
     }
 
     /**
      * Classifies the given instance using the perceptron.
      * The value returned corresponds to the (0-based) index of the predicted
-     * nominal class. For example � if the labels in the arff are defined as
+     * nominal class. For example, if the labels in the arff are defined as
      * { Yes, No }, then when the classifier predicts �Yes� this method will
      * return 0, and when the classifier predicts �No� this method will return 1.
      */
     public double classifyInstance(Instance inst) throws Exception {
         double perceptronTotal = 0.0;
-        for (int dimIndex = 0; dimIndex < weights.length; dimIndex++)
+        for (int dimIndex = 0; dimIndex < weights.length; dimIndex++) {
             perceptronTotal += weights[dimIndex] * inst.value(dimIndex);
-        return (Math.signum(perceptronTotal) + 1) / 2;
+        }
+
+        return (perceptronTotal >= 0) ? 1 : 0;
     }
 
     private void initializeWeights(int numAttributes) {
         weights = new double[numAttributes];
-        for (int i = 0; i < numAttributes; i++)
+        for (int i = 0; i < numAttributes; i++) {
             weights[i] = 0;
+        }
     }
 
     private List<Double> calculateSigns(Instances insts) {
@@ -85,18 +89,20 @@ public class Perceptron extends AbstractClassifier {
     }
 
     private double getProductWeightsAttribute(Instance instance) {
-        double result = 0;
-        for (int i = 0; i < instance.numAttributes(); i++) {
+        double result = 1 * weights[weights.length-1]; // add the bias (last item in the array)
+        for (int i = 0; i < weights.length-1; i++) {
             result += instance.value(i) * weights[i];
         }
+        
         return result;
     }
 
     private double calculateWeightDelta(int weightIndex, Instances insts, List<Double> instanceSigns) {
         double weightDeltaSum = 0.0;
         for (int instanceIndex = 0; instanceIndex < insts.size(); instanceIndex++) {
-            weightDeltaSum += (insts.get(instanceIndex).classValue() - instanceSigns.get(instanceIndex)) *
-                    insts.get(instanceIndex).value(weightIndex);
+            final Instance instance = insts.get(instanceIndex);
+            weightDeltaSum += (instance.classValue() - instanceSigns.get(instanceIndex)) *
+                    instance.value(weightIndex);
         }
 
         return weightDeltaSum * eta;
